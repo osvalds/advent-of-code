@@ -5,18 +5,14 @@
 (defn parse-line [line]
   (mapv #(Integer/parseInt %) (str/split line #"")))
 
-(defn get-2d [vec2d [y x]]
-  (let [row (get vec2d y)]
-    (get row x)))
-
 (defn row-low-coord [heatmap y]
   (let [row (get heatmap y)]
     (map-indexed
       (fn [x item]
-        (let [n (when (> y 0) (get-2d heatmap [(dec y) x]))
-              e (when (< x (dec (count row))) (get row (inc x)))
-              s (when (< y (dec (count heatmap))) (get-2d heatmap [(inc y) x]))
-              w (when (> x 0) (get row (dec x)))
+        (let [n (get-in heatmap [(dec y) x])
+              e (get row (inc x))
+              s (get-in heatmap [(inc y) x])
+              w (get row (dec x))
               comp (sort (remove nil? [n e s w]))]
           (when (< item (first comp)) [y x])))
       row)))
@@ -33,15 +29,14 @@
   [input]
   (let [heatmap (->> input (str/split-lines) (mapv parse-line))
         low-coords (get-map-low-coord heatmap)]
-    (apply + (map #(inc (get-2d heatmap %)) low-coords))))
+    (apply + (map #(inc (get-in heatmap %)) low-coords))))
 
 (defn get-adj [heatmap [y x]]
-  (let [width (count (first heatmap))
-        n (when (and (> y 0) (< (get-2d heatmap [(dec y) x]) 9)) [(dec y) x])
-        e (when (and (< x (dec width)) (< (get-2d heatmap [y (inc x)]) 9)) [y (inc x)])
-        s (when (and (< y (dec (count heatmap))) (< (get-2d heatmap [(inc y) x]) 9)) [(inc y) x])
-        w (when (and (> x 0) (< (get-2d heatmap [y (dec x)]) 9)) [y (dec x)])]
-    (remove nil? [n e s w])))
+  (let [n [(dec y) x]
+        e [y (inc x)]
+        s [(inc y) x]
+        w [y (dec x)]]
+    (filter #(< (get-in heatmap % 10) 9) [n e s w])))
 
 (defn basin-set [heatmap [y x] visited]
   (let [adjacent (get-adj heatmap [y x])
