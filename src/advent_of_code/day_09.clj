@@ -36,18 +36,18 @@
         e [y (inc x)]
         s [(inc y) x]
         w [y (dec x)]]
-    (filter #(< (get-in heatmap % 10) 9) [n e s w]))
+    (filter #(< (get-in heatmap % 10) 9) [n e s w])))
 
-  (defn basin-set [heatmap [y x] visited]
-    (let [adjacent (get-adj heatmap [y x])
-          need-to-visit (set/difference (set adjacent) visited)]
-      (if (= 0 (count need-to-visit))
+(defn basin-set [heatmap [y x] visited]
+  (let [adjacent (get-adj heatmap [y x])
+        need-to-visit (set/difference (set adjacent) visited)]
+    (if (= 0 (count need-to-visit))
+      visited
+      (reduce
+        (fn [visited-r [y1 x1]]
+          (basin-set heatmap [y1 x1] (conj visited-r [y1 x1])))
         visited
-        (reduce
-          (fn [visited-r [y1 x1]]
-            (basin-set heatmap [y1 x1] (conj visited-r [y1 x1])))
-          visited
-          need-to-visit)))))
+        need-to-visit))))
 
 (defn part-2
   "Day 09 Part 2"
