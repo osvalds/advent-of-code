@@ -1,5 +1,6 @@
 (ns advent-of-code.y2021.day-12
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str])
+  (:import (clojure.lang PersistentQueue)))
 
 (defn connected-vertices [edges vertex]
   (reduce
@@ -30,14 +31,15 @@
     (into next-q new-paths)))
 
 (defn process-q [graph q paths end can-add?]
-  (let [current-path (first q)
-        next-q (vec (rest q))]
+  (let [current-path (peek q)
+        next-q (pop q)]
     (if (= end (last current-path))
       [(conj paths current-path) next-q]
       [paths (add-new-paths-to-queue next-q graph current-path can-add?)])))
 
 (defn all-paths [graph start end can-add?]
-  (loop [q [[start]]
+  (loop [q (-> PersistentQueue/EMPTY
+             (conj [start]))
          paths []]
     (if (empty? q)
       paths
