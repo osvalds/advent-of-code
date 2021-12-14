@@ -1,39 +1,65 @@
 (ns advent-of-code.y2021.day-14
   (:require [clojure.string :as str]))
 
+(defn parse-rule [rule]
+  (let [[key insert] (str/split rule #" -> ")]
+    {key [(str (first key) insert) (str insert (second key))]}))
+
+(defn empty-counters [rules]
+  (reduce
+    (fn [result rule]
+      (assoc result (key rule) 0))
+    {}
+    rules))
+
 (defn parse [input]
   (let [[template r] (str/split input #"\n\n")
-        rules (mapv #(str/split % #" -> ") (str/split-lines r))]
-    [template
-     (reduce (fn [result [adj insert]] (assoc result adj (.charAt insert 0))) {} rules)]))
+        rules (into {} (mapv parse-rule (str/split-lines r)))]
+    [template rules (empty-counters rules)]))
 
-(defn insert [pairs rules]
+(defn insert [counters rules]
   (reduce
-    (fn [result pair]
-      (let [new-letter (get rules (str/join pair))]
-        (if new-letter
-          (conj result [(first pair) new-letter] [new-letter (second pair)])
-          (conj result pair))))
-    []
-    pairs))
+    (fn [result [rule-key count]]
+      (if (= count 0)
+        result
+        (let [[deriv1 deriv2] (get rules rule-key)]
+          (-> result
+            (update deriv1 + count)
+            (update deriv2 + count)))))
+    (empty-counters rules)
+    counters))
 
-(defn pairs->list [pairs]
-  (concat [] (first pairs) (mapv second (rest pairs))))
+(defn sum [old val]
+  (if old (+ old val) val))
 
-(defn freq-diff [pairs]
-  (let [freqs (sort-by val (frequencies (pairs->list pairs)))
-        min (val (first freqs))
-        max (val (last freqs))]
-    (- max min)))
+
+(defn freq-diff [counters template]
+  (let [fchar (first template)
+        lchar (last template)
+        char-counts (->> counters
+                      (reduce (fn [result [k v]]
+                                (-> result
+                                  (update (first k) sum v)
+                                  (update (second k) sum v))) {fchar 1 lchar 1}))]
+    char-counts))
+                      ;(vals)
+                      ;(sort))]
+    ;(- (/ (last char-counts) 2) (/ (first char-counts) 2))))
+
+(defn init-counters [template counters]
+  (->> template
+    (partition 2 1)
+    (map str/join)
+    (reduce (fn [result pair]
+              (assoc result pair 1)) counters)))
 
 (defn solve [input iterations]
-  (let [[template rules] (parse input)
-        pairs (partition 2 1 template)]
+  (let [[template rules counters] (parse input)]
     (loop [i 0
-           pairs pairs]
+           counters (init-counters template counters)]
       (if (< i iterations)
-        (recur (inc i) (insert pairs rules))
-        (freq-diff pairs)))))
+        (recur (inc i) (insert counters rules))
+        (freq-diff counters template)))))
 
 (defn part-1
   "Day 14 Part 1"
@@ -43,4 +69,4 @@
 (defn part-2
   "Day 14 Part 2"
   [input]
-  (solve input 20))
+  (solve input 40))

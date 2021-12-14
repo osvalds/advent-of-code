@@ -14,6 +14,9 @@
 
 (deftest part2
   (testing "example"
-    (time
-      (let [expected 2188189693529]
-        (is (= expected (part-2 (slurp (resource "2021/day-14-example.txt")))))))))
+    (let [expected 2188189693529]
+      (is (= expected (part-2 (slurp (resource "2021/day-14-example.txt")))))))
+
+  (testing "soļution"
+    (let [expected 2345]
+      (is (= expected (part-2 (slurp (resource "2021/day-14.txt"))))))))
