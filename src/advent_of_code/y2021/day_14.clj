@@ -32,34 +32,29 @@
 (defn sum [old val]
   (if old (+ old val) val))
 
-
 (defn freq-diff [counters template]
   (let [fchar (first template)
-        lchar (last template)
         char-counts (->> counters
                       (reduce (fn [result [k v]]
-                                (-> result
-                                  (update (first k) sum v)
-                                  (update (second k) sum v))) {fchar 1 lchar 1}))]
-    char-counts))
-                      ;(vals)
-                      ;(sort))]
-    ;(- (/ (last char-counts) 2) (/ (first char-counts) 2))))
+                                (update result (last k) sum v)) {fchar 1})
+                      (vals)
+                      (sort))]
+    (- (last char-counts) (first char-counts))))
 
 (defn init-counters [template counters]
   (->> template
     (partition 2 1)
     (map str/join)
     (reduce (fn [result pair]
-              (assoc result pair 1)) counters)))
+              (update result pair sum 1)) counters)))
 
 (defn solve [input iterations]
   (let [[template rules counters] (parse input)]
     (loop [i 0
-           counters (init-counters template counters)]
+           loop-counters (init-counters template counters)]
       (if (< i iterations)
-        (recur (inc i) (insert counters rules))
-        (freq-diff counters template)))))
+        (recur (inc i) (insert loop-counters rules))
+        (freq-diff loop-counters template)))))
 
 (defn part-1
   "Day 14 Part 1"

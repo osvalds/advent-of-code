@@ -18,5 +18,5 @@
       (is (= expected (part-2 (slurp (resource "2021/day-14-example.txt")))))))
 
   (testing "soļution"
-    (let [expected 2345]
+    (let [expected nil]
       (is (= expected (part-2 (slurp (resource "2021/day-14.txt"))))))))
