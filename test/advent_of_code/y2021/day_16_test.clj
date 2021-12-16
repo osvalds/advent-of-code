@@ -46,8 +46,7 @@
 
 (deftest part2
   (let [expected 3
-        result (part-2 "C200B40A82")
-        _ (println result)]
+        result (part-2 "C200B40A82")]
     (is (= expected (part-2 "C200B40A82"))))
 
   (let [expected 54]
