@@ -2,7 +2,7 @@
 
 (defn parse [input]
   (->> input
-    (re-seq #"\-{0,1}[0-9]+")
+    (re-seq #"-?[0-9]+")
     (map #(Integer/parseInt %))
     (partition 2)
     (mapv vec)))
